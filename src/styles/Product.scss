@@ -9,7 +9,7 @@
   cursor: default;
 
   .fa-times {
-    color: hsl(0, 80%, 45%);
+    color: hsl(0, 80%, 50%);
     cursor: pointer;
     padding: 2px;
     box-sizing: border-box;
@@ -42,12 +42,13 @@
     margin: 0.5em 0 0 0;
 
     .body-value {
+      background: inherit;
       font-family: inherit;
       margin: 0 0 0 1em;
       line-height: 1em;
       padding: 0 0 0.3em 0;
       border: 0;
-      border-bottom: 1px solid hsl(0, 0%, 87%);
+      border-bottom: 1px solid;
       text-align: right;
       flex: 1;
 

@@ -1,43 +1,99 @@
+@import "./mixins.scss";
+$white: hsl(0, 0%, 97%);
+$grey: hsl(0, 0%, 27%);
+$black: hsl(0, 0%, 10%);
+$accent-dark: #009b0f;
+$accent: #00d95e;
+$accent-light: #94eaa5;
+$secondary-dark: #d9007b;
+$secondary: #ea3b95;
+$secondary-light: #ef8fc3;
+
 .app {
   display: flex;
-  flex-direction: column;
   font-size: 16px;
-  background: hsl(0, 0%, 97%);
-  color: hsl(0, 0%, 15%);
-  max-width: 400px;
-  width: 100vw;
-  height: 100vh;
+  background: $white;
+  color: $black;
+  width: 100%;
+  height: 100%;
 
-  .section-header {
-    font-family: "Montserrat", "Lato", sans-serif;
-    margin: 0 0;
+  .side-panel,
+  .list {
+    height: 100%;
   }
 }
 
-.product-list {
-  padding: 1rem 2rem;
+.side-panel {
+  position: relative;
 
-  .product-wrapper {
-    display: flex;
-    flex-direction: column;
+  .options {
+    position: absolute;
+    top: 0;
+    right: -42px;
+    z-index: 0;
 
-    .product {
-      margin: 0.5rem 0 0;
+    .option {
+      color: $black;
+      padding: 0.5rem 0.8rem;
+      box-shadow: 4px 2px 4px rgba($black, 0.3);
+      &:first-child {
+        border-radius: 0 0.5rem 0 0;
+      }
+      &:last-child {
+        border-radius: 0 0 0.5rem 0;
+      }
+
+      &-products {
+        background: $accent;
+      }
+      &-resources {
+        background: $secondary;
+      }
     }
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.list {
+  // @include scrollbars(4px, $grey);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
+  min-width: 350px;
+  width: 20%;
+  box-shadow: 4px 0 8px rgba($black, 0.3);
 
-.App-link {
-  color: #09d3ac;
+  &-header {
+    font-family: "Montserrat", "Lato", sans-serif;
+    margin: 1rem 0 1rem;
+    text-align: center;
+  }
+
+  &-products {
+    @include scrollbars(3px, $accent-dark, $accent-light);
+    background: $accent;
+    .product {
+      color: $black;
+      background: $accent-light;
+    }
+  }
+  &-resources {
+    @include scrollbars(3px, $secondary-dark, $secondary-light);
+    background: $secondary;
+    .product {
+      background: $secondary-light;
+    }
+  }
+
+  .wrapper {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow-y: auto;
+
+    .product {
+      margin: 0.5rem 1rem 0;
+      &:first-child {
+        margin: 0 1rem;
+      }
+    }
+  }
 }
