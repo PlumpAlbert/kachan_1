@@ -2,20 +2,56 @@ import "../styles/App.scss";
 
 import React from "react";
 import Product from "../components/Product";
-import Resource from "../components/Resource";
 
 class App extends React.PureComponent {
   state = {
     products: [
-      { name: "Изделие № 1", production: 45.0, priority: 1 },
-      { name: "Изделие № 2", production: 40.0, priority: 2 }
+      { id: 0, production: 45.0, priority: 1 },
+      { id: 1, production: 40.0, priority: 2 }
     ],
-    resources: [
-      { name: "Изделие № 1", production: 45.0, priority: 1 },
-      { name: "Изделие № 2", production: 40.0, priority: 2 }
-    ],
-    periods: 2,
-    currentList: "products"
+    resources: 2,
+    periods: 2
+  };
+
+  productChanged = (id, property, newValue) => {
+    if (/^\d+(\.\d+)*$/.test(newValue)) {
+      this.setState(state => ({
+        ...state,
+        products: [
+          ...state.products.slice(0, id),
+          {
+            ...state.products[id],
+            [property]: Number(newValue)
+          },
+          ...state.products.slice(id + 1)
+        ]
+      }));
+    }
+  };
+
+  deleteProduct = id =>
+    this.setState(state => ({
+      ...state,
+      products: [
+        ...state.products.slice(0, id),
+        ...state.products.slice(id + 1)
+      ]
+    }));
+
+  resourcesChanged = e => {
+    const newValue = Number(e.currentTarget.value);
+    if (newValue < 1) {
+      return this.setState({ resources: 1 });
+    }
+    this.setState({ resources: newValue });
+  };
+
+  periodsChanged = e => {
+    const newValue = Number(e.currentTarget.value);
+    if (newValue < 1) {
+      return this.setState({ periods: 1 });
+    }
+    this.setState({ periods: newValue });
   };
 
   render() {
@@ -23,28 +59,35 @@ class App extends React.PureComponent {
     return (
       <div className="app">
         <div className="side-panel">
-          <div className={`list list-${currentList}`}>
-            <h2 className="list-header">
-              {currentList === "products" ? "Изделия" : "Ресурсы"}
-            </h2>
-            <div className={`wrapper wrapper-${currentList}`}>
-              {currentList === "products"
-                ? products.map(v => Product(v))
-                : resources.map(v => Resource(v))}
-            </div>
+          <div className="block">
+            <p className="block-header">Количество ресурсов</p>
+            <input
+              type="number"
+              className="block-input"
+              onChange={this.resourcesChanged}
+              value={resources}
+            />
           </div>
-          <div className="options">
-            <div
-              className="option option-products"
-              onClick={() => this.setState({ currentList: "products" })}
-            >
-              <i className="fa fa-list" />
-            </div>
-            <div
-              className="option option-resources"
-              onClick={() => this.setState({ currentList: "resources" })}
-            >
-              <i className="fa fa-book" />
+          <div className="block">
+            <p className="block-header">Количество периодов</p>
+            <input
+              type="number"
+              className="block-input"
+              onChange={this.periodsChanged}
+              value={periods}
+            />
+          </div>
+          <div className="list">
+            <h2 className="list-header">Изделия</h2>
+            <div className={`wrapper wrapper-${currentList}`}>
+              {products.map(v => (
+                <Product
+                  key={`product-${v.id}`}
+                  onChanged={this.productChanged}
+                  onDelete={this.deleteProduct}
+                  {...v}
+                />
+              ))}
             </div>
           </div>
         </div>
@@ -57,13 +100,15 @@ class App extends React.PureComponent {
               <thead>
                 <tr>
                   <th></th>
-                  <th colspan={resources.length}>Ресурсы</th>
+                  <th colSpan={resources}>Ресурсы</th>
                 </tr>
                 <tr>
-                  <th colspan={1}>Изделия</th>
-                  {resources.map((v, i) => (
-                    <th key={`consumption-header-${i}`}>{i + 1}</th>
-                  ))}
+                  <th colSpan={1}>Изделия</th>
+                  {Array(resources)
+                    .fill(0)
+                    .map((v, i) => (
+                      <th key={`consumption-header-${i}`}>{i + 1}</th>
+                    ))}
                 </tr>
               </thead>
               <tbody>
@@ -71,16 +116,18 @@ class App extends React.PureComponent {
                   return (
                     <tr key={`consumption-row-${i}`}>
                       <th>{i + 1}</th>
-                      {resources.map((col, j) => (
-                        <td key={`consumption-col-${j}`}>
-                          <input
-                            className="table-input"
-                            type="number"
-                            step="0.1"
-                            defaultValue={Math.random().toFixed(2)}
-                          />
-                        </td>
-                      ))}
+                      {Array(resources)
+                        .fill(0)
+                        .map((col, j) => (
+                          <td key={`consumption-col-${j}`}>
+                            <input
+                              className="table-input"
+                              type="number"
+                              step="0.1"
+                              defaultValue={Math.random().toFixed(2)}
+                            />
+                          </td>
+                        ))}
                     </tr>
                   );
                 })}
@@ -93,29 +140,33 @@ class App extends React.PureComponent {
               <thead>
                 <tr>
                   <th></th>
-                  <th colspan={resources.length}>Ресурсы</th>
+                  <th colSpan={resources}>Ресурсы</th>
                 </tr>
                 <tr>
                   <th>Период</th>
-                  {resources.map((v, i) => (
-                    <th key={`fonds-header-${i}`}>{i + 1}</th>
-                  ))}
+                  {Array(resources)
+                    .fill(0)
+                    .map((v, i) => (
+                      <th key={`fonds-header-${i}`}>{i + 1}</th>
+                    ))}
                 </tr>
               </thead>
               <tbody>
                 {new Array(periods).fill(0).map((row, i) => (
                   <tr key={`fonds-row-${i}`}>
                     <th>{i + 1}</th>
-                    {resources.map((v, j) => (
-                      <td key={`fonds-col-${j}`}>
-                        <input
-                          className="table-input"
-                          type="number"
-                          step="0.1"
-                          defaultValue={Math.random().toFixed(2)}
-                        />
-                      </td>
-                    ))}
+                    {Array(resources)
+                      .fill(0)
+                      .map((v, j) => (
+                        <td key={`fonds-col-${j}`}>
+                          <input
+                            className="table-input"
+                            type="number"
+                            step="0.1"
+                            defaultValue={Math.random().toFixed(2)}
+                          />
+                        </td>
+                      ))}
                   </tr>
                 ))}
               </tbody>
@@ -129,20 +180,27 @@ class App extends React.PureComponent {
               <thead>
                 <tr>
                   <th></th>
-                  <th colspan={products.length}>Изделия</th>
+                  <th colSpan={products.length}>Изделия</th>
                 </tr>
                 <tr>
                   <th>Период</th>
                   {products.map((v, i) => (
-                    <th className={`parties-header-${i}`}>{i + 1}</th>
+                    <th key={`parties-header-${i}`}>{i + 1}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {new Array(periods).fill(0).map((row, i) => (
                   <tr key={`parties-row-${i}`}>
+                    <th>{i + 1}</th>
                     {products.map((col, j) => (
-                      <td key={`parties-col-${j}`}></td>
+                      <td key={`parties-col-${j}`}>
+                        <input
+                          type="number"
+                          className="table-input"
+                          defaultValue={Math.random().toFixed(2)}
+                        />
+                      </td>
                     ))}
                   </tr>
                 ))}

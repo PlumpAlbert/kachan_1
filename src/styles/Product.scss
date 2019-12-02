@@ -1,15 +1,17 @@
+@import "./colors.scss";
+
 .product {
-  background: #ffffff;
+  background: $white;
   display: flex;
   flex-direction: column;
   border-radius: 0.25rem;
-  box-shadow: 0 1px 2px hsla(0, 0%, 10%, 0.53);
+  box-shadow: 0 1px 3px rgba($black, 0.6);
   padding: 0.4rem 0.8rem;
   min-width: 200px;
   cursor: default;
 
   .fa-times {
-    color: hsl(0, 80%, 50%);
+    color: $secondary-dark;
     cursor: pointer;
     padding: 2px;
     box-sizing: border-box;
@@ -51,9 +53,8 @@
       border-bottom: 1px solid;
       text-align: right;
       flex: 1;
-
       &:focus {
-        border-bottom-color: hsl(205, 50%, 60%);
+        border-bottom-color: $secondary;
       }
     }
   }

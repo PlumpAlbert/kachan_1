@@ -1,13 +1,5 @@
 @import "./mixins.scss";
-$white: hsl(0, 0%, 97%);
-$grey: hsl(0, 0%, 27%);
-$black: hsl(0, 0%, 10%);
-$accent-dark: #009b0f;
-$accent: #00d95e;
-$accent-light: #94eaa5;
-$secondary-dark: #d9007b;
-$secondary: #ea3b95;
-$secondary-light: #ef8fc3;
+@import "./colors.scss";
 
 .app {
   display: flex;
@@ -24,42 +16,37 @@ $secondary-light: #ef8fc3;
 }
 
 .side-panel {
-  position: relative;
-  margin-right: calc(42px + 1rem);
-  .options {
-    position: absolute;
-    top: 0;
-    right: -42px;
-    z-index: 0;
+  min-width: 350px;
+  width: 20%;
+  background: $accent;
+  box-shadow: 2px 0 4px rgba($black, 0.6);
 
-    .option {
-      color: $black;
-      padding: 0.5rem 0.8rem;
-      box-shadow: 4px 2px 4px rgba($black, 0.3);
-      &:first-child {
-        border-radius: 0 0.5rem 0 0;
-      }
-      &:last-child {
-        border-radius: 0 0 0.5rem 0;
-      }
-
-      &-products {
-        background: $accent;
-      }
-      &-resources {
-        background: $secondary;
+  .block {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    .block-header {
+      font-family: "Montserrat", "Lato", sans-serif;
+      font-weight: bold;
+    }
+    .block-input {
+      background: inherit;
+      font-family: inherit;
+      width: 8ch;
+      padding: 0.4rem 0;
+      border: 0;
+      border-bottom: 1px solid;
+      &:focus {
+        border-bottom-color: $secondary;
       }
     }
   }
 }
 
 .list {
-  // @include scrollbars(4px, $grey);
   display: flex;
   flex-direction: column;
-  min-width: 350px;
-  width: 20%;
-  box-shadow: 4px 0 8px rgba($black, 0.3);
 
   &-header {
     font-family: "Montserrat", "Lato", sans-serif;
@@ -67,20 +54,9 @@ $secondary-light: #ef8fc3;
     text-align: center;
   }
 
-  &-products {
-    @include scrollbars(3px, $accent-dark, $accent-light);
-    background: $accent;
-    .product {
-      color: $black;
-      background: $accent-light;
-    }
-  }
-  &-resources {
-    @include scrollbars(3px, $secondary-dark, $secondary-light);
-    background: $secondary;
-    .product {
-      background: $secondary-light;
-    }
+  .product {
+    color: $black;
+    background: $accent-light;
   }
 
   .wrapper {
@@ -98,11 +74,24 @@ $secondary-light: #ef8fc3;
   }
 }
 
-.table {
-  th {
-    text-align: center;
+.content {
+  margin: 0 auto;
+  padding: 0 4rem;
+  overflow-y: auto;
+  .table-wrapper {
+    border-bottom: 1px solid $grey;
+    padding: 1rem 0;
   }
-  .table-input {
-    width: 7ch;
+  .content-header {
+    text-align: center;
+    margin: 0 0 0.5rem;
+  }
+  .table {
+    th {
+      text-align: center;
+    }
+    .table-input {
+      width: 7ch;
+    }
   }
 }
