@@ -25,7 +25,7 @@ $secondary-light: #ef8fc3;
 
 .side-panel {
   position: relative;
-
+  margin-right: calc(42px + 1rem);
   .options {
     position: absolute;
     top: 0;
@@ -95,5 +95,14 @@ $secondary-light: #ef8fc3;
         margin: 0 1rem;
       }
     }
+  }
+}
+
+.table {
+  th {
+    text-align: center;
+  }
+  .table-input {
+    width: 7ch;
   }
 }
