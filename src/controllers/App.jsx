@@ -9,8 +9,20 @@ class App extends React.PureComponent {
       { id: 0, production: 45.0, priority: 1 },
       { id: 1, production: 40.0, priority: 2 }
     ],
-    resources: 2,
-    periods: 2
+    resources: 3,
+    periods: 2,
+    resourceConsumption: [
+      [2, 5, 5],
+      [4, 4, 2]
+    ],
+    fonds: [
+      [100, 200, 300],
+      [200, 300, 400]
+    ],
+    mvp: [
+      [2, 3],
+      [4, 5]
+    ]
   };
 
   productChanged = (id, property, newValue) => {
@@ -55,7 +67,15 @@ class App extends React.PureComponent {
   };
 
   render() {
-    const { products, resources, currentList, periods } = this.state;
+    const {
+      products,
+      resources,
+      currentList,
+      periods,
+      fonds,
+      resourceConsumption,
+      mvp
+    } = this.state;
     return (
       <div className="app">
         <div className="side-panel">
@@ -112,22 +132,20 @@ class App extends React.PureComponent {
                 </tr>
               </thead>
               <tbody>
-                {products.map((row, i) => {
+                {resourceConsumption.map((row, i) => {
                   return (
                     <tr key={`consumption-row-${i}`}>
                       <th>{i + 1}</th>
-                      {Array(resources)
-                        .fill(0)
-                        .map((col, j) => (
-                          <td key={`consumption-col-${j}`}>
-                            <input
-                              className="table-input"
-                              type="number"
-                              step="0.1"
-                              defaultValue={Math.random().toFixed(2)}
-                            />
-                          </td>
-                        ))}
+                      {row.map((col, j) => (
+                        <td key={`consumption-col-${j}`}>
+                          <input
+                            className="table-input"
+                            type="number"
+                            step="0.1"
+                            defaultValue={col}
+                          />
+                        </td>
+                      ))}
                     </tr>
                   );
                 })}
@@ -152,21 +170,19 @@ class App extends React.PureComponent {
                 </tr>
               </thead>
               <tbody>
-                {new Array(periods).fill(0).map((row, i) => (
+                {fonds.map((row, i) => (
                   <tr key={`fonds-row-${i}`}>
                     <th>{i + 1}</th>
-                    {Array(resources)
-                      .fill(0)
-                      .map((v, j) => (
-                        <td key={`fonds-col-${j}`}>
-                          <input
-                            className="table-input"
-                            type="number"
-                            step="0.1"
-                            defaultValue={Math.random().toFixed(2)}
-                          />
-                        </td>
-                      ))}
+                    {row.map((col, j) => (
+                      <td key={`fonds-col-${j}`}>
+                        <input
+                          className="table-input"
+                          type="number"
+                          step="0.1"
+                          defaultValue={col}
+                        />
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
@@ -190,15 +206,15 @@ class App extends React.PureComponent {
                 </tr>
               </thead>
               <tbody>
-                {new Array(periods).fill(0).map((row, i) => (
+                {mvp.map((row, i) => (
                   <tr key={`parties-row-${i}`}>
                     <th>{i + 1}</th>
-                    {products.map((col, j) => (
+                    {row.map((col, j) => (
                       <td key={`parties-col-${j}`}>
                         <input
                           type="number"
                           className="table-input"
-                          defaultValue={Math.random().toFixed(2)}
+                          defaultValue={col}
                         />
                       </td>
                     ))}
