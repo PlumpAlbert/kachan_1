@@ -142,7 +142,20 @@ class App extends React.PureComponent {
                             className="table-input"
                             type="number"
                             step="0.1"
-                            defaultValue={col}
+                            value={col}
+                            onChange={e =>
+                              this.setState({
+                                resourceConsumption: [
+                                  ...resourceConsumption.slice(0, i),
+                                  [
+                                    ...resourceConsumption[i].slice(0, j),
+                                    Number(e.currentTarget.value),
+                                    ...resourceConsumption[i].slice(j)
+                                  ],
+                                  ...resourceConsumption.slice(i + 1)
+                                ]
+                              })
+                            }
                           />
                         </td>
                       ))}
