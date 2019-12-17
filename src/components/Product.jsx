@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import "../styles/Product.scss";
 
-const Product = ({ id, priority, production, onChanged, onDelete }) => (
+const Product = ({ id, priority, annual, onChanged, onDelete }) => (
   <div className="product">
     <div className="product-line">
       <p className="product-name">{`Изделие № ${id + 1}`}</p>
@@ -16,10 +16,9 @@ const Product = ({ id, priority, production, onChanged, onDelete }) => (
           type="text"
           className="body-value"
           onChange={
-            onChanged &&
-            (e => onChanged(id, "production", e.currentTarget.value))
+            onChanged && (e => onChanged(id, "annual", e.currentTarget.value))
           }
-          value={production}
+          value={annual}
         />
       </p>
       <p className="product-line">
@@ -40,7 +39,7 @@ const Product = ({ id, priority, production, onChanged, onDelete }) => (
 Product.propTypes = {
   id: PropTypes.number.isRequired,
   priority: PropTypes.number.isRequired,
-  production: PropTypes.number.isRequired,
+  annual: PropTypes.number.isRequired,
   onChanged: PropTypes.func
 };
 

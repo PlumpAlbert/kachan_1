@@ -6,8 +6,8 @@ import Product from "../components/Product";
 class App extends React.PureComponent {
   state = {
     products: [
-      { id: 0, production: 45.0, priority: 1 },
-      { id: 1, production: 40.0, priority: 2 }
+      { id: 0, annual: 45.0, priority: 1 },
+      { id: 1, annual: 40.0, priority: 2 }
     ],
     resources: 3,
     periods: 2,
