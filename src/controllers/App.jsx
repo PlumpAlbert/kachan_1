@@ -1,6 +1,7 @@
 import "../styles/App.scss";
 
 import React from "react";
+import axios from "axios";
 import Product from "../components/Product";
 
 class App extends React.PureComponent {
@@ -66,6 +67,30 @@ class App extends React.PureComponent {
     this.setState({ periods: newValue });
   };
 
+  getPlan = () => {
+    const {
+      products,
+      resources,
+      currentList,
+      periods,
+      fonds,
+      resourceConsumption,
+      mvp
+    } = this.state;
+    axios
+      .post("http://localhost:8000/api", {
+        products,
+        resourceCount: resources,
+        periodsCount: periods,
+        fonds,
+        resourceConsumption,
+        mvp
+      })
+      .then(res => {
+        console.log("Response from the server", res.data);
+      });
+  };
+
   render() {
     const {
       products,
@@ -111,6 +136,7 @@ class App extends React.PureComponent {
             </div>
           </div>
         </div>
+
         <div className="content">
           <div className="table-wrapper">
             <h2 className="content-header">
@@ -141,7 +167,7 @@ class App extends React.PureComponent {
                           <input
                             className="table-input"
                             type="number"
-                            step="0.1"
+                            step="1"
                             value={col}
                             onChange={e =>
                               this.setState({
@@ -191,7 +217,7 @@ class App extends React.PureComponent {
                         <input
                           className="table-input"
                           type="number"
-                          step="0.1"
+                          step="1"
                           defaultValue={col}
                         />
                       </td>
@@ -236,6 +262,9 @@ class App extends React.PureComponent {
               </tbody>
             </table>
           </div>
+          <button className="btn" onClick={this.getPlan}>
+            Рассчитать
+          </button>
         </div>
       </div>
     );
