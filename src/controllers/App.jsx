@@ -7,8 +7,8 @@ import Product from "../components/Product";
 class App extends React.PureComponent {
   state = {
     products: [
-      { id: 0, annual: 45.0, priority: 1 },
-      { id: 1, annual: 40.0, priority: 2 }
+      {id: 0, annual: 45.0, priority: 1},
+      {id: 1, annual: 40.0, priority: 2}
     ],
     resources: 3,
     periods: 2,
@@ -54,41 +54,91 @@ class App extends React.PureComponent {
   resourcesChanged = e => {
     const newValue = Number(e.currentTarget.value);
     if (newValue < 1) {
-      return this.setState({ resources: 1 });
+      return this.setState({resources: 1});
     }
-    this.setState({ resources: newValue });
+    this.setState({resources: newValue});
   };
 
   periodsChanged = e => {
     const newValue = Number(e.currentTarget.value);
     if (newValue < 1) {
-      return this.setState({ periods: 1 });
+      return this.setState({periods: 1});
     }
-    this.setState({ periods: newValue });
+    this.setState({periods: newValue});
   };
 
   getPlan = () => {
     const {
       products,
       resources,
-      currentList,
       periods,
       fonds,
       resourceConsumption,
       mvp
     } = this.state;
     axios
-      .post("http://localhost:8000/api", {
-        products,
-        resourceCount: resources,
-        periodsCount: periods,
-        fonds,
-        resourceConsumption,
-        mvp
-      })
-      .then(res => {
-        console.log("Response from the server", res.data);
-      });
+      .post(
+        "http://toau1.herokuapp.com/api",
+        {
+          products,
+          resourceCount: resources,
+          periodsCount: periods,
+          fonds,
+          resourceConsumption,
+          mvp
+        },
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      )
+      .then(this.serverResponse);
+  };
+
+  serverResponse = ({data}) => {
+    this.setState({
+      plan: data
+    });
+  };
+
+  /**
+   * Вывести полученный календарный план
+   */
+  renderPlan = () => {
+    const {plan, products, periods} = this.state;
+    let planMatrix = [];
+    for (let i = 0; i < products.length; ++i) {
+      planMatrix.push([]);
+      for (let j = 0; j < periods; j++) {
+        let currentPlan = plan[i * products.length + j];
+        planMatrix[i].push(<td>{currentPlan.value}</td>);
+      }
+    }
+    return (
+      <table>
+        <thead>
+          <tr>
+            <th />
+            <th colSpan={periods}>Период</th>
+          </tr>
+          <tr>
+            <th>Изделие</th>
+            {Array(periods).fill(0).map((v,i)=>(
+              <th>{i}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {planMatrix.map((row, ix) => (
+            <tr>
+              <th>{ix}</th>
+              {row}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
   };
 
   render() {
@@ -99,7 +149,8 @@ class App extends React.PureComponent {
       periods,
       fonds,
       resourceConsumption,
-      mvp
+      mvp,
+      plan
     } = this.state;
     return (
       <div className="app">
@@ -266,6 +317,13 @@ class App extends React.PureComponent {
             Рассчитать
           </button>
         </div>
+
+        {plan ? (
+          <div className="side-panel">
+            <h2>Календарный план</h2>
+            {this.renderPlan()}
+          </div>
+        ) : null}
       </div>
     );
   }
