@@ -7,8 +7,8 @@ import Product from "../components/Product";
 class App extends React.PureComponent {
   state = {
     products: [
-      {id: 0, annual: 45.0, priority: 1},
-      {id: 1, annual: 40.0, priority: 2}
+      { id: 0, annual: 45.0, priority: 1 },
+      { id: 1, annual: 40.0, priority: 2 }
     ],
     resources: 3,
     periods: 2,
@@ -54,17 +54,17 @@ class App extends React.PureComponent {
   resourcesChanged = e => {
     const newValue = Number(e.currentTarget.value);
     if (newValue < 1) {
-      return this.setState({resources: 1});
+      return this.setState({ resources: 1 });
     }
-    this.setState({resources: newValue});
+    this.setState({ resources: newValue });
   };
 
   periodsChanged = e => {
     const newValue = Number(e.currentTarget.value);
     if (newValue < 1) {
-      return this.setState({periods: 1});
+      return this.setState({ periods: 1 });
     }
-    this.setState({periods: newValue});
+    this.setState({ periods: newValue });
   };
 
   getPlan = () => {
@@ -78,7 +78,8 @@ class App extends React.PureComponent {
     } = this.state;
     axios
       .post(
-        "http://toau1.herokuapp.com/api",
+        //"http://toau1.herokuapp.com/api",
+        "http://localhost:8000/api",
         {
           products,
           resourceCount: resources,
@@ -96,9 +97,10 @@ class App extends React.PureComponent {
       .then(this.serverResponse);
   };
 
-  serverResponse = ({data}) => {
+  serverResponse = ({ data }) => {
     this.setState({
-      plan: data
+      plan: data.products,
+      report: data.report
     });
   };
 
@@ -106,15 +108,7 @@ class App extends React.PureComponent {
    * Вывести полученный календарный план
    */
   renderPlan = () => {
-    const {plan, products, periods} = this.state;
-    let planMatrix = [];
-    for (let i = 0; i < products.length; ++i) {
-      planMatrix.push([]);
-      for (let j = 0; j < periods; j++) {
-        let currentPlan = plan[i * products.length + j];
-        planMatrix[i].push(<td>{currentPlan.value}</td>);
-      }
-    }
+    const { plan, periods } = this.state;
     return (
       <table>
         <thead>
@@ -124,19 +118,21 @@ class App extends React.PureComponent {
           </tr>
           <tr>
             <th>Изделие</th>
-            {Array(periods).fill(0).map((v,i)=>(
-              <th>{i}</th>
+            {Array(periods).fill(0).map((v, i) => (
+              <th>{i + 1}</th>
             ))}
           </tr>
         </thead>
-        <tbody>
-          {planMatrix.map((row, ix) => (
-            <tr>
-              <th>{ix}</th>
-              {row}
+        <tbody>{
+          plan.map((row, i) => (
+            <tr key={`plan-${i}`}>
+              <th>{i + 1}</th>
+              {
+                row.map((v, j) => <td key={`plan-${i}${j}`}>{v}</td>)
+              }
             </tr>
-          ))}
-        </tbody>
+          ))
+        }</tbody>
       </table>
     );
   };
@@ -322,6 +318,7 @@ class App extends React.PureComponent {
           <div className="side-panel">
             <h2>Календарный план</h2>
             {this.renderPlan()}
+            <a download href={this.state.report}>Скачать отчет</a>
           </div>
         ) : null}
       </div>
