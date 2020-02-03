@@ -46,14 +46,45 @@ class App extends React.PureComponent {
     }
   };
 
-  deleteProduct = id =>
+  addProduct = () =>
+    this.setState(state => ({
+      products: [
+        ...state.products,
+        {
+          id: state.products[state.products.length - 1].id + 1,
+          annual: 0,
+          priority: 1
+        }
+      ],
+      resourceConsumption: [
+        ...state.resourceConsumption,
+        new Array(state.resourceCount).fill(0)
+      ],
+      mvp: state.mvp.map(row => [...row, 0])
+    }));
+
+  deleteProduct = id => {
+    if (this.state.products.length === 1) return;
+    let index = this.state.products.findIndex(p => p.id === id);
     this.setState(state => ({
       ...state,
       products: [
-        ...state.products.slice(0, id),
-        ...state.products.slice(id + 1)
-      ]
+        ...state.products.slice(0, index),
+        ...state.products.slice(index + 1).map(v => {
+          v.id -= 1;
+          return v;
+        })
+      ],
+      resourceConsumption: [
+        ...state.resourceConsumption.slice(0, index),
+        ...state.resourceConsumption.slice(index + 1)
+      ],
+      mvp: state.mvp.map(row => [
+        ...row.slice(0, index),
+        ...row.slice(index + 1)
+      ])
     }));
+  };
 
   resourcesChanged = e => {
     let newValue = Number(e.currentTarget.value);
@@ -243,6 +274,7 @@ class App extends React.PureComponent {
                 />
               ))}
             </div>
+            <button onClick={this.addProduct}>Добавить продукт</button>
           </div>
         </div>
 
