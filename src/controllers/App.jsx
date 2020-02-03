@@ -3,6 +3,10 @@ import "../styles/App.scss";
 import React from "react";
 import axios from "axios";
 import Product from "../components/Product";
+import TableComponent from "../components/TableComponent";
+
+let host = "https://toau1.herokuapp.com";
+if (process.env.NODE_ENV === "debug") host = "http://localhost:8000";
 
 class App extends React.PureComponent {
   state = {
@@ -10,8 +14,8 @@ class App extends React.PureComponent {
       { id: 0, annual: 45.0, priority: 1 },
       { id: 1, annual: 40.0, priority: 2 }
     ],
-    resources: 3,
-    periods: 2,
+    resourceCount: 3,
+    periodsCount: 2,
     resourceConsumption: [
       [2, 5, 5],
       [4, 4, 2]
@@ -52,26 +56,66 @@ class App extends React.PureComponent {
     }));
 
   resourcesChanged = e => {
-    const newValue = Number(e.currentTarget.value);
-    if (newValue < 1) {
-      return this.setState({ resources: 1 });
+    let newValue = Number(e.currentTarget.value);
+    const { resourceConsumption, fonds, resourceCount } = this.state;
+    let newResourceConsumption, newFonds;
+    if (newValue < 1) newValue = 1;
+    if (newValue === resourceCount) return;
+    else if (newValue < resourceCount) {
+      newResourceConsumption = resourceConsumption.map(row =>
+        row.slice(0, newValue)
+      );
+      newFonds = fonds.map(row => row.slice(0, newValue));
+    } else {
+      newResourceConsumption = resourceConsumption.map(row => {
+        let newRow = row.slice();
+        newRow.push(...new Array(newValue - row.length).fill(0));
+        return newRow;
+      });
+      newFonds = fonds.map(row => {
+        let newRow = row.slice();
+        newRow.push(...new Array(newValue - row.length).fill(0));
+        return newRow;
+      });
     }
-    this.setState({ resources: newValue });
+    this.setState({
+      resourceCount: newValue,
+      fonds: newFonds,
+      resourceConsumption: newResourceConsumption
+    });
   };
 
   periodsChanged = e => {
-    const newValue = Number(e.currentTarget.value);
-    if (newValue < 1) {
-      return this.setState({ periods: 1 });
+    let newValue = Number(e.currentTarget.value);
+    const { fonds, mvp, resourceCount, periodsCount } = this.state;
+    let newFonds, newMvp;
+    if (newValue < 1) newValue = 1;
+    if (newValue === periodsCount) return;
+    else if (newValue < periodsCount) {
+      newFonds = fonds.slice(0, newValue);
+      newMvp = mvp.slice(0, newValue);
+    } else {
+      newFonds = [
+        ...fonds,
+        ...new Array(newValue - periodsCount).fill(
+          new Array(resourceCount).fill(0)
+        )
+      ];
+      newMvp = [
+        ...mvp,
+        ...new Array(newValue - periodsCount).fill(
+          new Array(resourceCount).fill(0)
+        )
+      ];
     }
-    this.setState({ periods: newValue });
+    this.setState({ periodsCount: newValue, mvp: newMvp, fonds: newFonds });
   };
 
   getPlan = () => {
     const {
       products,
-      resources,
-      periods,
+      resourceCount,
+      periodsCount,
       fonds,
       resourceConsumption,
       mvp
@@ -82,10 +126,10 @@ class App extends React.PureComponent {
         "http://localhost:8000/api",
         {
           products,
-          resourceCount: resources,
-          periodsCount: periods,
-          fonds,
+          resourceCount,
+          periodsCount,
           resourceConsumption,
+          fonds,
           mvp
         },
         {
@@ -94,55 +138,64 @@ class App extends React.PureComponent {
           }
         }
       )
-      .then(this.serverResponse);
+      .then(({ data }) => {
+        if (data.error) return alert(data.error);
+        this.setState({
+          plan: data.products,
+          report: data.report
+        });
+      })
+      .catch(err => {
+        debugger;
+        alert(err);
+      });
   };
 
-  serverResponse = ({ data }) => {
-    this.setState({
-      plan: data.products,
-      report: data.report
-    });
-  };
-
-  /**
-   * Вывести полученный календарный план
-   */
-  renderPlan = () => {
-    const { plan, periods } = this.state;
-    return (
-      <table>
-        <thead>
-          <tr>
-            <th />
-            <th colSpan={periods}>Период</th>
-          </tr>
-          <tr>
-            <th>Изделие</th>
-            {Array(periods).fill(0).map((v, i) => (
-              <th>{i + 1}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>{
-          plan.map((row, i) => (
-            <tr key={`plan-${i}`}>
-              <th>{i + 1}</th>
-              {
-                row.map((v, j) => <td key={`plan-${i}${j}`}>{v}</td>)
-              }
-            </tr>
-          ))
-        }</tbody>
-      </table>
+  saveData = () => {
+    const {
+      products,
+      resourceCount,
+      periodsCount,
+      fonds,
+      resourceConsumption,
+      mvp
+    } = this.state;
+    const element = document.createElement("a");
+    const file = new Blob(
+      [
+        JSON.stringify({
+          products,
+          resourceCount,
+          periodsCount,
+          fonds,
+          resourceConsumption,
+          mvp
+        })
+      ],
+      { type: "application/json", endings: "native" }
     );
+    element.href = URL.createObjectURL(file);
+    element.download = `data-${new Date().toISOString()}.json`;
+    document.body.appendChild(element); // Required for this to work in FireFox
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  loadData = e => {
+    e.stopPropagation();
+    e.preventDefault();
+    let file = e.target.files[0];
+    file.text().then(json => {
+      this.setState(JSON.parse(json));
+    });
   };
 
   render() {
     const {
       products,
-      resources,
+      resourceCount,
       currentList,
-      periods,
+      periodsCount,
       fonds,
       resourceConsumption,
       mvp,
@@ -151,13 +204,22 @@ class App extends React.PureComponent {
     return (
       <div className="app">
         <div className="side-panel">
+          <button onClick={() => this.refs.fileDialog.click()}>
+            <input
+              type="file"
+              ref="fileDialog"
+              style={{ display: "none" }}
+              onChange={this.loadData}
+            />
+            Загрузить данные
+          </button>
           <div className="block">
             <p className="block-header">Количество ресурсов</p>
             <input
               type="number"
               className="block-input"
               onChange={this.resourcesChanged}
-              value={resources}
+              value={resourceCount}
             />
           </div>
           <div className="block">
@@ -166,7 +228,7 @@ class App extends React.PureComponent {
               type="number"
               className="block-input"
               onChange={this.periodsChanged}
-              value={periods}
+              value={periodsCount}
             />
           </div>
           <div className="list">
@@ -189,136 +251,66 @@ class App extends React.PureComponent {
             <h2 className="content-header">
               Затраты ресурсов на единицу продукции
             </h2>
-            <table className="table table-consumption">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th colSpan={resources}>Ресурсы</th>
-                </tr>
-                <tr>
-                  <th colSpan={1}>Изделия</th>
-                  {Array(resources)
-                    .fill(0)
-                    .map((v, i) => (
-                      <th key={`consumption-header-${i}`}>{i + 1}</th>
-                    ))}
-                </tr>
-              </thead>
-              <tbody>
-                {resourceConsumption.map((row, i) => {
-                  return (
-                    <tr key={`consumption-row-${i}`}>
-                      <th>{i + 1}</th>
-                      {row.map((col, j) => (
-                        <td key={`consumption-col-${j}`}>
-                          <input
-                            className="table-input"
-                            type="number"
-                            step="1"
-                            value={col}
-                            onChange={e =>
-                              this.setState({
-                                resourceConsumption: [
-                                  ...resourceConsumption.slice(0, i),
-                                  [
-                                    ...resourceConsumption[i].slice(0, j),
-                                    Number(e.currentTarget.value),
-                                    ...resourceConsumption[i].slice(j)
-                                  ],
-                                  ...resourceConsumption.slice(i + 1)
-                                ]
-                              })
-                            }
-                          />
-                        </td>
-                      ))}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <TableComponent
+              rowCount={products.length}
+              rowHeader="Изделие"
+              columnCount={resourceCount}
+              columnHeader="Ресурс"
+              value={resourceConsumption}
+              onChange={v => this.setState({ resourceConsumption: v })}
+            />
           </div>
+
           <div className="table-wrapper">
             <h2 className="content-header">Фонды ресурсов</h2>
-            <table className="table table-fonds">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th colSpan={resources}>Ресурсы</th>
-                </tr>
-                <tr>
-                  <th>Период</th>
-                  {Array(resources)
-                    .fill(0)
-                    .map((v, i) => (
-                      <th key={`fonds-header-${i}`}>{i + 1}</th>
-                    ))}
-                </tr>
-              </thead>
-              <tbody>
-                {fonds.map((row, i) => (
-                  <tr key={`fonds-row-${i}`}>
-                    <th>{i + 1}</th>
-                    {row.map((col, j) => (
-                      <td key={`fonds-col-${j}`}>
-                        <input
-                          className="table-input"
-                          type="number"
-                          step="1"
-                          defaultValue={col}
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <TableComponent
+              rowCount={periodsCount}
+              rowHeader="Период"
+              columnCount={resourceCount}
+              columnHeader="Ресурс"
+              value={fonds}
+              onChange={v => this.setState({ fonds: v })}
+            />
           </div>
+
           <div className="table-wrapper">
             <h2 className="content-header">
               Минимально необходимые партии продукции
             </h2>
-            <table className="table parties-table">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th colSpan={products.length}>Изделия</th>
-                </tr>
-                <tr>
-                  <th>Период</th>
-                  {products.map((v, i) => (
-                    <th key={`parties-header-${i}`}>{i + 1}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {mvp.map((row, i) => (
-                  <tr key={`parties-row-${i}`}>
-                    <th>{i + 1}</th>
-                    {row.map((col, j) => (
-                      <td key={`parties-col-${j}`}>
-                        <input
-                          type="number"
-                          className="table-input"
-                          defaultValue={col}
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <TableComponent
+              rowCount={periodsCount}
+              rowHeader="Период"
+              columnCount={products.length}
+              columnHeader="Изделия"
+              value={mvp}
+              onChange={v => this.setState({ mvp: v })}
+            />
           </div>
-          <button className="btn" onClick={this.getPlan}>
-            Рассчитать
-          </button>
+
+          <div className="buttons">
+            <button className="btn" onClick={this.getPlan}>
+              Рассчитать
+            </button>
+            <button className="btn" onClick={this.saveData}>
+              Сохранить данные
+            </button>
+          </div>
         </div>
 
         {plan ? (
           <div className="side-panel">
             <h2>Календарный план</h2>
-            {this.renderPlan()}
-            <a download href={this.state.report}>Скачать отчет</a>
+            <TableComponent
+              fixed
+              rowCount={plan.length}
+              rowHeader="Изделие"
+              columnCount={plan[0].length}
+              columnHeader="Период"
+              value={plan}
+            />
+            <a download href={this.state.report}>
+              Скачать отчет
+            </a>
           </div>
         ) : null}
       </div>

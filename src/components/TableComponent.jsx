@@ -7,13 +7,13 @@ const TableComponent = ({
   columnHeader = "Column",
   rowCount = 2,
   columnCount = 3,
-  defaultValue = undefined
+  value = undefined,
+  fixed = false,
+  onChange = undefined
 }) => {
-  if (!defaultValue) {
-    defaultValue = new Array(rowCount).fill(new Array(columnCount).fill(0));
+  if (!value) {
+    value = new Array(rowCount).fill(new Array(columnCount).fill(0));
   }
-  const [value, updateValue] = useState(defaultValue);
-
   /**
    * Updates the value of the table cell
    * @param {number} rowIndex
@@ -25,15 +25,15 @@ const TableComponent = ({
     if (columnIndex >= value[0].length || columnIndex < 0) return;
     if (!/^\d+(\.\d+)*/.test(value)) return;
     let newValue = [
-      value.slice(0, rowIndex),
+      ...value.slice(0, rowIndex),
       [
-        value[rowIndex].slice(0, columnIndex),
-        cellValue,
-        value[rowIndex].slice(columnIndex + 1)
+        ...value[rowIndex].slice(0, columnIndex),
+        Number(cellValue.replace(",", ".")),
+        ...value[rowIndex].slice(columnIndex + 1)
       ],
-      value.slice(rowIndex + 1)
+      ...value.slice(rowIndex + 1)
     ];
-    updateValue(newValue);
+    if (onChange) onChange(newValue);
   }
 
   return (
@@ -56,11 +56,15 @@ const TableComponent = ({
             <th>{i + 1}</th>
             {row.map((v, j) => (
               <td key={`table__cell-${i}-${j}`}>
-                <input
-                  defaultValue={v}
-                  type="number"
-                  onBlur={e => updateCellValue(i, j, e.currentTarget.value)}
-                />
+                {fixed ? (
+                  v
+                ) : (
+                  <input
+                    defaultValue={v}
+                    type="number"
+                    onChange={e => updateCellValue(i, j, e.currentTarget.value)}
+                  />
+                )}
               </td>
             ))}
           </tr>
@@ -75,7 +79,9 @@ TableComponent.propTypes = {
   columnHeader: PropTypes.string,
   rowCount: PropTypes.number,
   columnCount: PropTypes.number,
-  defaultValue: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number))
+  defaultValue: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
+  fixed: PropTypes.bool,
+  onChange: PropTypes.func
 };
 
 export default TableComponent;

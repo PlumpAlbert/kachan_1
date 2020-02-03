@@ -19,9 +19,14 @@
   width: 20%;
   background: $accent;
   box-shadow: 2px 0 4px rgba($black, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
   .block {
     display: flex;
+    box-sizing: border-box;
+    width: 100%;
     align-items: center;
     justify-content: space-between;
     padding: 0 1rem;
