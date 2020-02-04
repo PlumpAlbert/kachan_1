@@ -153,8 +153,7 @@ class App extends React.PureComponent {
     } = this.state;
     axios
       .post(
-        //"http://toau1.herokuapp.com/api",
-        "http://localhost:8000/api",
+        `${host}/api`,
         {
           products,
           resourceCount,
